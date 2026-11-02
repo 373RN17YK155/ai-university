@@ -4,7 +4,8 @@
   internal service names anywhere in this workspace. Describe the work service generically. The
   pre-commit hook blocks known patterns (`.sensitive-patterns`, gitignored), but don't rely on it.
 - The user will be working with Java/Kotlin and Spring directly in the near future: practical,
-  job-ready focus. Has never written Java.
+  job-ready focus. Has never written Java. Writes TypeScript: explain Java/Kotlin by contrast
+  with TS (structural vs nominal typing, erased vs reified-ish generics, null handling, async model).
 
 ## Patterns
 Skill-heavy + hands-on. Trainers for syntax and recognition (Java↔Kotlin, annotations, reading stack
@@ -31,5 +32,11 @@ lesson unblocks a real step. No vault notes for this subject.
 ## Plan sketch (revise freely)
 Java core (from the user's other language) → build & run (Maven) → Spring core (DI, beans, config,
 profiles) → REST + OpenAPI-first → JPA/jOOQ/Liquibase → transactions → Feign → Kafka → scheduling &
-metrics → testing (Testcontainers, WireMock). Kotlin woven in from early on: each Java idiom shown with
-its Kotlin twin once the Java side is solid.
+metrics → testing (Testcontainers, WireMock). Kotlin from lesson 3 on (decided 2026-11-02: user knows TS, so
+Kotlin syntax is cheap; Java stays the base because Spring and its errors read through Java): each
+idiom shown in Java, then its Kotlin twin.
+
+Budget: 4–6 h/week, ~20–45 h before start: not enough for all 8 success items at depth. Priority if
+time runs short: (1) read the service end-to-end, (2) endpoint via OpenAPI → controller → service →
+repo, (3) JPA + Liquibase, (4) tests with Testcontainers; then Feign, Kafka, @Scheduled/metrics.
+Lessons sized for ~30–45 min each, ~6–8 per week max.

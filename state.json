@@ -4,7 +4,7 @@
     "java-spring/lessons/0001-first-java-program.html": {
       "status": "active",
       "updated": "2026-11-02",
-      "note": "Waiting on: JDK 17 installed (java -version), quiz score + misses, what felt odd vs their current language (ask which). Next: classes/interfaces/collections, then Kotlin twin."
+      "note": "Waiting on: JDK 17 installed (java -version), quiz score + misses, what felt odd vs TypeScript. Next: classes/interfaces/collections (contrast with TS structural typing), Kotlin twin from lesson 3."
     }
   },
   "updated": "2026-11-02"
