@@ -2,9 +2,9 @@
   "version": 1,
   "items": {
     "java-spring/lessons/0001-first-java-program.html": {
-      "status": "active",
+      "status": "done",
       "updated": "2026-11-02",
-      "note": "Waiting on: JDK 17 installed (java -version), quiz score + misses, what felt odd vs TypeScript. Next: classes/interfaces/collections (contrast with TS structural typing), Kotlin twin from lesson 3."
+      "note": "Done 2026-11-02: 5/5, JDK 17 ok. See LR-0001."
     }
   },
   "updated": "2026-11-02"

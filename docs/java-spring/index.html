@@ -60,43 +60,10 @@
 <div class="nav"><a href="../index.html">← Home</a></div>
 <h1>Java Spring</h1>
 <p class="sub">built 2026-11-02</p>
-<div class="nav tabs"><a href="#now">Now</a><a href="#lessons">Lessons</a></div>
-<section class="shelf" id="now">
-<h2>Now</h2>
-<a class="card" href="lessons/0001-first-java-program.html"><span class="t">Первая программа на Java 17 · Java &amp; Spring</span><span class="m"><span class="dot">●</span><span class="kind">lesson</span><span>2026-11-02</span></span></a>
-</section>
 <section class="shelf" id="lessons">
 <h2>Lessons</h2>
-<a class="card" href="lessons/0001-first-java-program.html"><span class="t">Первая программа на Java 17 · Java &amp; Spring</span><span class="m"><span class="dot">●</span><span>2026-11-02</span></span></a>
+<a class="card done" href="lessons/0001-first-java-program.html"><span class="t">Первая программа на Java 17 · Java &amp; Spring</span><span class="m"><span>2026-11-02</span></span></a>
 </section>
-<script>
-(function () {
-  var tabs = [].slice.call(document.querySelectorAll(".tabs a")),
-      shelves = [].slice.call(document.querySelectorAll(".shelf"));
-  if (!tabs.length) return;
-  // Drop the ids so arriving on #tools never scrolls past the tab bar.
-  shelves.forEach(function (s) { s.setAttribute("data-shelf", s.id); s.removeAttribute("id"); });
-  function show(id) {
-    if (!tabs.some(function (a) { return a.hash === "#" + id; })) return false;
-    tabs.forEach(function (a) { a.classList.toggle("on", a.hash === "#" + id); });
-    shelves.forEach(function (s) { s.classList.toggle("on", s.getAttribute("data-shelf") === id); });
-    return true;
-  }
-  function fromHash() { if (!show(location.hash.slice(1))) show(tabs[0].hash.slice(1)); }
-  document.documentElement.classList.add("js");
-  tabs.forEach(function (a) {
-    a.addEventListener("click", function (e) {
-      e.preventDefault();
-      show(a.hash.slice(1));
-      // replaceState, not a new entry: Back leaves the subject page in one step.
-      try { history.replaceState(null, "", a.hash); } catch (err) {}
-    });
-  });
-  window.addEventListener("hashchange", fromHash);
-  fromHash();
-  if (location.hash) window.scrollTo(0, 0);
-})();
-</script>
 </main>
 </body>
 </html>
