@@ -94,7 +94,12 @@ errors.
 At the end of any session that changed this repo, commit with a short message and push. Pushing
 is what updates my phone. Don't ask.
 
-## Mobile site
-`python3 site/build.py` → site/dist/. Every push to main redeploys (Netlify). Never let a page share
-its name with a sibling folder (reading.html beside reading/): Netlify serves the page and the
-folder's index becomes unreachable. The build warns about this.
+## Mobile site (GitHub Pages)
+The repo is PUBLIC; GitHub Pages serves `docs/` from `main`. `docs/` is build output: never edit
+it by hand. The pre-commit hook (`.githooks/pre-commit`, enabled with
+`git config core.hooksPath .githooks`) runs `python3 site/build.py` and stages `docs/` on every
+commit, so committing + pushing is publishing. A subject can't be named `docs` or `meta`.
+Never let a page share its name with a sibling folder (reading.html beside reading/): the folder's
+index becomes unreachable. The build warns about this.
+Public repo means NOTES.md, learning-records/ and state.json are readable on github.com: keep
+them free of anything private, and still never publish them to the site.
