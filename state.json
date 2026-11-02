@@ -1,4 +1,11 @@
 {
   "version": 1,
-  "items": {}
+  "items": {
+    "java-spring/lessons/0001-first-java-program.html": {
+      "status": "active",
+      "updated": "2026-11-02",
+      "note": "Waiting on: JDK 17 installed (java -version), quiz score + misses, what felt odd vs their current language (ask which). Next: classes/interfaces/collections, then Kotlin twin."
+    }
+  },
+  "updated": "2026-11-02"
 }

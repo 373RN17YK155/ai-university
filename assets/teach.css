@@ -1,0 +1,41 @@
+/* teach.css — structural styles for the shared TEACH widgets. Colours come
+   from the subject stylesheet's tokens (linked before this file). */
+
+/* ---------------------------------------------------------------- quiz -- */
+.t-quiz { font-family: var(--sans); margin: 1.2rem 0; }
+.t-q { border: 1px solid var(--rule); border-radius: 8px; padding: .9rem 1rem; margin: 0 0 1rem; }
+.t-q-text { margin: 0 0 .7rem; font-weight: 600; line-height: 1.4; }
+.t-q-opts { display: grid; gap: .45rem; }
+.t-q-opt {
+  font: inherit; font-size: .95rem; text-align: left; cursor: pointer;
+  background: var(--bg); color: var(--ink); border: 1px solid var(--rule); border-radius: 6px;
+  padding: .55rem .75rem; line-height: 1.35;
+}
+.t-q-opt:hover:not([disabled]) { border-color: var(--accent); }
+.t-q-opt[disabled] { cursor: default; }
+.t-q-opt.is-right { border-color: var(--good); box-shadow: inset 3px 0 0 var(--good); }
+.t-q-opt.is-wrong { border-color: var(--bad); box-shadow: inset 3px 0 0 var(--bad); }
+.t-q-why { margin: .7rem 0 0; font-size: .92rem; color: var(--muted); }
+.t-q-why b { color: var(--ink); }
+.t-quiz-score { font-weight: 600; margin: .4rem 0 0; }
+.t-quiz-retry {
+  font: inherit; font-size: .9rem; cursor: pointer; margin-left: .6rem;
+  background: none; border: 1px solid var(--rule); border-radius: 6px; padding: .25rem .6rem; color: var(--ink);
+}
+
+/* ------------------------------------------------- skill-page trainers -- */
+.t-back { font-family: var(--sans); font-size: .9rem; margin: 0 0 1rem; }
+.t-trainer { border: 1px solid var(--rule); border-radius: 8px; margin: 0 0 .8rem; background: var(--bg); }
+.t-trainer > summary {
+  cursor: pointer; list-style: none; padding: .8rem 1rem; font-family: var(--sans);
+  display: flex; flex-wrap: wrap; gap: .2rem .8rem; align-items: baseline;
+}
+.t-trainer > summary::-webkit-details-marker { display: none; }
+.t-trainer > summary::before { content: "▸"; color: var(--accent); }
+.t-trainer[open] > summary::before { content: "▾"; }
+.t-trainer-title { font-weight: 600; }
+.t-trainer-origin { color: var(--muted); font-size: .85rem; }
+.t-trainer-body { padding: 0 1rem 1rem; border-top: 1px solid var(--rule); }
+.t-trainer-blurb, .t-trainer-from { font-family: var(--sans); font-size: .9rem; color: var(--muted); }
+.t-stage { margin-top: .8rem; }
+.t-trainer-error { color: var(--bad); font-family: var(--sans); }
