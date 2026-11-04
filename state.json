@@ -5,7 +5,12 @@
       "status": "done",
       "updated": "2026-11-02",
       "note": "Done 2026-11-02: 5/5, JDK 17 ok. See LR-0001."
+    },
+    "java-spring/lessons/0002-class-instead-of-record.html": {
+      "status": "active",
+      "updated": "2026-11-04",
+      "note": "Waiting on: step-3 equals/hashCode/toString done unaided?, drill first-try score /10, quiz score + misses. Next: interfaces + nominal vs structural typing; first Kotlin (data class twin of Payment)."
     }
   },
-  "updated": "2026-11-02"
+  "updated": "2026-11-04"
 }

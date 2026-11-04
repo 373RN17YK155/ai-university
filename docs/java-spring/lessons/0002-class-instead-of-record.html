@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ru"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Класс вместо record: что Java пишет за тебя · Java &amp; Spring</title>
+<link rel="stylesheet" href="../assets/spring.css">
+<link rel="stylesheet" href="../../assets/teach.css">
+<script src="../../assets/quiz.js"></script>
+<script src="../../assets/drill.js"></script>
+</head><body><main>
+
+<p class="kicker">Java &amp; Spring · Урок 2</p>
+<h1>Класс вместо record: что Java пишет за тебя</h1>
+<p class="lede">Ты перепишешь <code>Payment</code> обычным классом и своими руками напишешь всё, что record
+генерировал молча. После этого станет понятно, почему геттер вызывается со скобками, что на самом деле значит
+<code>static</code> и почему в Java нельзя сравнивать объекты через <code>==</code>.</p>
+
+<h2>Зачем это</h2>
+<p>В рабочем сервисе около 900 файлов, и большинство из них — классы: контроллеры, сервисы, сущности,
+DTO. Прочитать любой из них — значит узнать четыре части: поля, конструктор, методы и
+<code>static</code>-члены. Record прячет их за одной строкой, а обычный класс показывает целиком.</p>
+
+<h2>Шаг 1. Программа</h2>
+<p>В песочнице <code>~/Projects/java-sandbox</code> создай <code>Payments.java</code> и, как и в прошлый раз,
+перепечатай код руками:</p>
+<pre><span class="k">import</span> java.math.BigDecimal;
+
+<span class="k">public class</span> Payments {
+
+    <span class="k">record</span> PaymentRecord(String account, BigDecimal amount) {}
+
+    <span class="k">static class</span> PaymentClass {
+        <span class="k">private static int</span> created = 0;
+
+        <span class="k">private final</span> String account;
+        <span class="k">private final</span> BigDecimal amount;
+
+        PaymentClass(String account, BigDecimal amount) {
+            <span class="k">this</span>.account = account;
+            <span class="k">this</span>.amount = amount;
+            created++;
+        }
+
+        String getAccount() {
+            <span class="k">return</span> account;
+        }
+
+        BigDecimal getAmount() {
+            <span class="k">return</span> amount;
+        }
+
+        <span class="k">static int</span> created() {
+            <span class="k">return</span> created;
+        }
+    }
+
+    <span class="k">public static void</span> main(String[] args) {
+        <span class="k">var</span> r1 = <span class="k">new</span> PaymentRecord("acc-1", <span class="k">new</span> BigDecimal("10.50"));
+        <span class="k">var</span> r2 = <span class="k">new</span> PaymentRecord("acc-1", <span class="k">new</span> BigDecimal("10.50"));
+        System.out.println("record equals: " + r1.equals(r2));
+        System.out.println("record ==:     " + (r1 == r2));
+
+        <span class="k">var</span> c1 = <span class="k">new</span> PaymentClass("acc-1", <span class="k">new</span> BigDecimal("10.50"));
+        <span class="k">var</span> c2 = <span class="k">new</span> PaymentClass("acc-1", <span class="k">new</span> BigDecimal("10.50"));
+        System.out.println("class equals:  " + c1.equals(c2));
+        System.out.println("class print:   " + c1);
+        System.out.println("created:       " + PaymentClass.created());
+    }
+}</pre>
+<p><code>java Payments.java</code> выведет следующее (хеш после <code>@</code> у тебя будет другим):</p>
+<pre>record equals: true
+record ==:     false
+class equals:  false
+class print:   Payments$PaymentClass@2ea6137
+created:       2</pre>
+
+<h3>Анатомия класса</h3>
+<table>
+<tr><th>Часть</th><th>Что это и сравнение с TypeScript</th></tr>
+<tr><td><code>private final String account;</code></td><td>Поле. <code>private</code> — доступно только изнутри класса,
+<code>final</code> — присваивается один раз, в конструкторе. В TS это <code>private readonly account: string</code>. Record
+делает свои поля именно такими.</td></tr>
+<tr><td><code>PaymentClass(String account, …) { this.account = account; }</code></td><td>Конструктор: называется
+так же, как класс, и не имеет возвращаемого типа. Аналог в TS — <code>constructor(…)</code>. Сокращения
+<code>constructor(private readonly account: string)</code>, как в TS, в Java нет: поле объявляется и присваивается отдельно.</td></tr>
+<tr><td><code>String getAccount() { return account; }</code></td><td>Геттер — <b>обычный метод</b>. Свойств, как в TS
+(<code>get account()</code>, которое читается как поле), в Java нет. Отсюда скобки. Имя <code>getX</code> — соглашение JavaBeans,
+по нему Jackson превращает объект в JSON, а Spring связывает свойства. Record использует короткое имя: <code>account()</code>.</td></tr>
+<tr><td><code>private static int created</code></td><td>Поле <b>класса</b>, а не объекта: одна переменная на всех. Два
+<code>new</code> — два разных <code>account</code>, но <code>created</code> один, и он равен 2. В TS — <code>static</code> так же.</td></tr>
+<tr><td><code>static int created()</code></td><td>Метод класса: вызывается как <code>PaymentClass.created()</code>, без объекта.
+Поэтому внутри него нет <code>this</code>, и до <code>account</code> он не дотянется.</td></tr>
+</table>
+
+<h2>Шаг 2. Убери <code>static</code> у класса</h2>
+<p>Замени <code>static class PaymentClass</code> на <code>class PaymentClass</code> и запусти:</p>
+<pre>Payments.java:38: error: non-static variable this cannot be referenced from a static context
+        var c1 = new PaymentClass("acc-1", new BigDecimal("10.50"));</pre>
+<p>Вложенный класс без <code>static</code> — это <em>внутренний</em> класс: каждый его объект привязан к объекту
+внешнего класса <code>Payments</code>. У статического метода <code>main</code> такого объекта нет, поэтому
+<code>new</code> не скомпилируется <a class="cite" href="https://dev.java/learn/classes-objects/nested-classes/">[dev.java: Nested Classes]</a>.
+Record из урока 1 этим не страдал: вложенный record неявно статический. Верни <code>static</code>.</p>
+
+<h2>Шаг 3. Научи класс сравниваться</h2>
+<p><code>==</code> на объектах сравнивает <b>ссылки</b> — «это один и тот же объект?». В TS
+<code>===</code> на объектах работает так же. Сравнение «по смыслу» в Java делает метод <code>equals</code>. Но
+если его не написать, класс унаследует версию от <code>Object</code>, а она тоже сравнивает ссылки
+<a class="cite" href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#equals(java.lang.Object)">[Object.equals]</a>.
+Отсюда <code>class equals: false</code>. Record пишет <code>equals</code> по полям сам.</p>
+<div class="callout">
+<p><b>Задание.</b> Допиши в <code>PaymentClass</code> три метода, чтобы его вывод совпал с выводом record:
+<code>class equals: true</code> и <code>class print: PaymentClass[account=acc-1, amount=10.50]</code>.</p>
+<ul>
+<li><code>public boolean equals(Object o)</code> — равны, если совпадают оба поля;</li>
+<li><code>public int hashCode()</code> — обязан давать одинаковое число для равных объектов. Иначе
+<code>HashMap</code> и <code>HashSet</code> «потеряют» объект. Возьми <code>Objects.hash(account, amount)</code> из <code>java.util.Objects</code>;</li>
+<li><code>public String toString()</code>.</li>
+</ul>
+<p>Над каждым поставь аннотацию <code>@Override</code>. Это просьба к компилятору проверить, что ты действительно
+переопределяешь метод родителя, а не создаёшь новый с опечаткой в имени. Аннотации — первый шаг к Spring:
+там почти всё ими и объявляется.</p>
+</div>
+<details>
+<summary>Подсказка: проверка типа в <code>equals</code></summary>
+<p><code>if (!(o instanceof PaymentClass other)) return false;</code> проверяет тип и сразу заводит переменную
+<code>other</code> нужного типа <a class="cite" href="https://openjdk.org/jeps/394">[JEP 394]</a>. Похоже на type guard в TS.</p>
+</details>
+<details>
+<summary>Решение (сначала попробуй сам)</summary>
+<pre><span class="k">import</span> java.util.Objects;   <span class="c">// в начало файла</span>
+
+        <span class="k">@Override</span>
+        <span class="k">public boolean</span> equals(Object o) {
+            <span class="k">if</span> (<span class="k">this</span> == o) <span class="k">return true</span>;
+            <span class="k">if</span> (!(o <span class="k">instanceof</span> PaymentClass other)) <span class="k">return false</span>;
+            <span class="k">return</span> account.equals(other.account) &amp;&amp; amount.equals(other.amount);
+        }
+
+        <span class="k">@Override</span>
+        <span class="k">public int</span> hashCode() {
+            <span class="k">return</span> Objects.hash(account, amount);
+        }
+
+        <span class="k">@Override</span>
+        <span class="k">public</span> String toString() {
+            <span class="k">return</span> "PaymentClass[account=" + account + ", amount=" + amount + "]";
+        }</pre>
+<p>Около 20 строк на то, что record даёт одной строкой. Именно поэтому в Kotlin есть
+<code>data class</code>, а в Java-проектах часто используют Lombok. Обоим будет свой урок.</p>
+</details>
+
+<h2>Шаг 4. Ловушка для денег</h2>
+<p>Добавь в конец <code>main</code>:</p>
+<pre>System.out.println(<span class="k">new</span> BigDecimal("10.5").equals(<span class="k">new</span> BigDecimal("10.50")));
+System.out.println(<span class="k">new</span> BigDecimal("10.5").compareTo(<span class="k">new</span> BigDecimal("10.50")));</pre>
+<p>Получится <code>false</code> и <code>0</code>. <code>equals</code> у <code>BigDecimal</code> учитывает и
+<b>масштаб</b> — количество знаков после точки, — а <code>compareTo</code> сравнивает только значение (0 значит
+«равны») <a class="cite" href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/math/BigDecimal.html#equals(java.lang.Object)">[BigDecimal.equals]</a>.
+Суммы денег сравнивают через <code>compareTo</code>. Заметь, что наш <code>PaymentClass.equals</code> (как и
+record) этим тоже грешит: платежи на 10.5 и 10.50 для него разные.</p>
+
+<h2>Тренажёр: читаем сигнатуры</h2>
+<p>В рабочем коде тебя будут тормозить сигнатуры: тип стоит не там, где ты привык. Выбери TS-эквивалент Java-объявления.
+Клавиши: 1–3 — выбрать, Enter — дальше. Тренажёр живёт и на странице навыка
+<a href="../tools/0001-reading-java-signatures.html">«Чтение Java-сигнатур»</a>: возвращайся к нему, пока не будешь
+проходить все 10 с первой попытки.</p>
+<div id="drill"></div>
+<script>
+  TEACH.runDrill(document.getElementById("drill"), {
+    items: [
+      { id: "sig-total", prompt: "<pre>static BigDecimal total(List&lt;Payment&gt; payments)</pre>",
+        options: ["static total(payments: Payment[]): BigDecimal",
+                  "static total(payments: BigDecimal[]): Payment",
+                  "static total(payments: Payment): BigDecimal[]"],
+        answer: 0, why: "Тип перед именем — это тип результата; в скобках тип стоит перед именем параметра." },
+      { id: "sig-getter", prompt: "<pre>String getAccount()</pre>",
+        options: ["getAccount(): string",
+                  "get account(): string",
+                  "getAccount(account: string): void"],
+        answer: 0, why: "В Java геттер — обычный метод, а не TS-аксессор <code>get</code>." },
+      { id: "sig-void", prompt: "<pre>void log(String message)</pre>",
+        options: ["log(message: string): void",
+                  "log(): string",
+                  "log(message: void): string"],
+        answer: 0, why: "<code>void</code> — тип результата: метод ничего не возвращает." },
+      { id: "sig-field", prompt: "<pre>private final BigDecimal amount;</pre>",
+        options: ["private readonly amount: BigDecimal;",
+                  "private static amount: BigDecimal;",
+                  "public amount?: BigDecimal;"],
+        answer: 0, why: "<code>final</code> у поля ≈ <code>readonly</code>: присваивается один раз." },
+      { id: "sig-const", prompt: "<pre>public static final int MAX_ITEMS = 50;</pre>",
+        options: ["static readonly MAX_ITEMS: number = 50;",
+                  "readonly MAX_ITEMS: number = 50;",
+                  "static MAX_ITEMS: number = 50;"],
+        answer: 0, why: "<code>static</code> — одно на класс, <code>final</code> — не меняется. Так в Java пишут константы." },
+      { id: "sig-bool", prompt: "<pre>boolean isEmpty()</pre>",
+        options: ["isEmpty(): boolean",
+                  "isEmpty: boolean",
+                  "isEmpty(value: boolean): void"],
+        answer: 0, why: "Скобки — значит метод. Для <code>boolean</code> геттеры по соглашению начинаются с <code>is</code>." },
+      { id: "sig-list", prompt: "<pre>List&lt;String&gt; names(Payment payment)</pre>",
+        options: ["names(payment: Payment): string[]",
+                  "names(payment: string[]): Payment",
+                  "names(): Payment[]"],
+        answer: 0, why: "<code>List&lt;String&gt;</code> перед именем — это результат; параметр — <code>Payment</code>." },
+      { id: "sig-map", prompt: "<pre>Map&lt;String, BigDecimal&gt; totalsByAccount()</pre>",
+        options: ["totalsByAccount(): Map&lt;string, BigDecimal&gt;",
+                  "totalsByAccount(): Map&lt;BigDecimal, string&gt;",
+                  "totalsByAccount(map: Map&lt;string, BigDecimal&gt;): void"],
+        answer: 0, why: "Порядок дженерик-параметров тот же: сначала ключ, потом значение." },
+      { id: "sig-static-method", prompt: "<pre>static int created()</pre>",
+        options: ["static created(): number",
+                  "created(): number",
+                  "static created: number"],
+        answer: 0, why: "<code>static</code> — метод класса, скобки — это метод, а не поле." },
+      { id: "sig-ctor", prompt: "<pre>PaymentClass(String account, BigDecimal amount)</pre>",
+        options: ["constructor(account: string, amount: BigDecimal)",
+                  "PaymentClass(account: string, amount: BigDecimal): void",
+                  "static create(account: string): PaymentClass"],
+        answer: 0, why: "Метод с именем класса и без типа результата — это конструктор." }
+    ]
+  });
+</script>
+
+<h2>Проверь себя</h2>
+<p>По памяти, не листая вверх.</p>
+<div id="quiz"></div>
+<script>
+TEACH.renderQuiz("quiz", { questions: [
+  { id: "q-equals", q: "<code>c1.equals(c2)</code> у класса без своего <code>equals</code> вернул <code>false</code>. Почему?",
+    options: ["Унаследованный equals сравнивает ссылки",
+              "Поля BigDecimal нельзя сравнивать вообще",
+              "Конструктор не сохранил значения полей"],
+    answer: 0, why: "<code>Object.equals</code> — это <code>this == o</code>. Сравнение по полям надо написать (или взять record)." },
+  { id: "q-hash", q: "Зачем переопределять <code>hashCode</code> вместе с <code>equals</code>?",
+    options: ["Иначе HashMap и HashSet их не найдут",
+              "Без него класс просто не скомпилируется",
+              "Иначе toString выведет пустую строку"],
+    answer: 0, why: "Хеш-коллекции сначала ищут по <code>hashCode</code>, и только потом сверяют <code>equals</code>." },
+  { id: "q-scale", q: "<code>new BigDecimal(\"10.5\").equals(new BigDecimal(\"10.50\"))</code> — что вернёт?",
+    options: ["false: equals учитывает и масштаб",
+              "true: числа равны математически",
+              "Ошибку компиляции: разные строки"],
+    answer: 0, why: "Для сравнения значений — <code>compareTo(...) == 0</code>." },
+  { id: "q-nested", q: "Почему <code>PaymentClass</code> объявлен как <code>static class</code> внутри <code>Payments</code>?",
+    options: ["Иначе для new нужен объект Payments",
+              "Иначе его поля станут общими для всех",
+              "Иначе он будет виден из других файлов"],
+    answer: 0, why: "Внутренний (не static) класс привязан к объекту внешнего, а в <code>main</code> его нет." },
+  { id: "q-static", q: "После двух <code>new PaymentClass(...)</code>: сколько существует <code>created</code> и сколько <code>account</code>?",
+    options: ["created — одно, account — по одному на объект",
+              "created — два, account — одно на весь класс",
+              "Оба по два: по копии на каждый новый объект"],
+    answer: 0, why: "<code>static</code> — поле класса, остальные поля — у каждого объекта свои." }
+]});
+</script>
+
+<h2>Первоисточник</h2>
+<p class="source"><a href="https://dev.java/learn/classes-objects/">dev.java — Classes and Objects</a>: прочитай
+разделы о создании классов и об определении методов. Дальше, по желанию, <a href="https://dev.java/learn/records/">dev.java — Records</a>:
+что ещё умеет record (например, проверять данные в компактном конструкторе).</p>
+
+<h2>Отчитайся</h2>
+<ul>
+<li>получилось ли задание из шага 3 без подсказки и решения;</li>
+<li>сколько сигнатур тренажёра ты прошёл с первой попытки;</li>
+<li>сколько набрал в квизе и на чём ошибся;</li>
+<li>что осталось непонятным.</li>
+</ul>
+<p>Следующий урок — интерфейсы. В нём же впервые появится Kotlin: тот же <code>Payment</code> одной строкой.</p>
+
+<footer>Вопросы по уроку задавай мне. Новый урок появится, когда напишешь «следующий урок».</footer>
+</main></body></html>
