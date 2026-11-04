@@ -5,7 +5,8 @@ demand: write an engine when the first lesson needs it, and promote a subject co
 second subject wants it. Planned/expected engines: `store.js` (per-item mastery, `localStorage`
 prefix `teach:`), `drill.js` (`TEACH.runDrill`), `speeddrill.js` (`TEACH.speedDrill`), `quiz.js`
 (`TEACH.renderQuiz`, every answer the same length), `recall.js` (`TEACH.recallPad`), `teach.css`
-(widget structure incl. the `.t-trainer` block). Present today: `toolpage.js` (`TEACH.trainer`).
+(widget structure incl. the `.t-trainer` block). Present today: `toolpage.js` (`TEACH.trainer`), `quiz.js` (`TEACH.renderQuiz`), `drill.js`
+(`TEACH.runDrill`), `codecopy.js` (copy button on every `<pre>`, no API: just link it), `teach.css`.
 
 ## Engine contract
 

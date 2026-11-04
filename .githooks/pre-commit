@@ -1,15 +1,11 @@
 #!/bin/sh
-# Rebuild the GitHub Pages site (docs/) and stage it with every commit, then
-# refuse the commit if any staged line matches a pattern in .sensitive-patterns
+# Refuse the commit if any staged line matches a pattern in .sensitive-patterns
 # (gitignored, one case-insensitive ERE per line: the list itself is private).
 # Enable once per clone: git config core.hooksPath .githooks
-set -e
-cd "$(git rev-parse --show-toplevel)"
-python3 site/build.py
-git add -A docs
+cd "$(git rev-parse --show-toplevel)" || exit 1
 
 if [ -s .sensitive-patterns ]; then
-  hits=$(git diff --cached -U0 --no-color | grep '^+' | grep -v '^+++' | grep -i -E -f .sensitive-patterns || true)
+  hits=$(git diff --cached -U0 --no-color | grep '^+' | grep -v '^+++' | grep -i -E -f .sensitive-patterns)
   if [ -n "$hits" ]; then
     echo "pre-commit: staged changes match .sensitive-patterns — commit blocked:" >&2
     echo "$hits" >&2

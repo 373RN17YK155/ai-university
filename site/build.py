@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """build.py — render the teaching workspaces into a static, read-only site.
 
-    python3 site/build.py          (from the repo root; the pre-commit hook runs the same)
+    python3 site/build.py          (from the repo root; the Pages workflow runs the same)
 
-Output goes to docs/ (served by GitHub Pages from main /docs):
+Output goes to site/dist/ (deployed to GitHub Pages by .github/workflows/pages.yml):
   - every subject's lessons/reference/projects/tools docs (html, pdf, pictures)
     plus subject and shared assets, mirrored so relative links keep working
   - index.html — Home: everything ACTIVE across all subjects, a chip per subject
@@ -29,7 +29,7 @@ from datetime import date
 from importlib.machinery import SourceFileLoader
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DIST = os.path.join(ROOT, "docs")
+DIST = os.path.join(ROOT, "site", "dist")
 
 # Never copied into the site.
 SKIP_EXTS = (".md", ".mscz", ".view.json")
@@ -554,9 +554,6 @@ def main():
 
     for hit in shadowed_folders():
         warn("%s shadows the folder of the same name on Netlify — its index.html is unreachable" % hit)
-
-    # GitHub Pages: serve files as-is, no Jekyll pass.
-    open(os.path.join(DIST, ".nojekyll"), "w").close()
 
     with open(os.path.join(DIST, "robots.txt"), "w", encoding="utf-8") as fh:
         fh.write("User-agent: *\nDisallow: /\n")

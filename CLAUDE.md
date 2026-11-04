@@ -57,7 +57,8 @@ second subject wants it. See assets/README.md.
 
 ## Authoring rules (the mobile site depends on these)
 Self-contained HTML apart from relative links into assets/: no CDN, no external CSS, no absolute
-paths, system fonts. Every doc has the viewport meta and a meaningful <title>.
+paths, system fonts. Every doc has the viewport meta and a meaningful <title>. Every lesson and
+reference doc with code blocks links ../../assets/codecopy.js (a copy button on each <pre>).
 
 ## Audience rule: do not spoil
 NOTES.md, learning-records/ and state.json `note` fields are agent-facing: they hold predictions
@@ -95,10 +96,12 @@ At the end of any session that changed this repo, commit with a short message an
 is what updates my phone. Don't ask.
 
 ## Mobile site (GitHub Pages)
-The repo is PUBLIC; GitHub Pages serves `docs/` from `main`. `docs/` is build output: never edit
-it by hand. The pre-commit hook (`.githooks/pre-commit`, enabled with
-`git config core.hooksPath .githooks`) runs `python3 site/build.py` and stages `docs/` on every
-commit, so committing + pushing is publishing. A subject can't be named `docs` or `meta`.
+The repo is PUBLIC. `.github/workflows/pages.yml` runs `python3 site/build.py` on every push to
+`main` and deploys site/dist/ to GitHub Pages, so committing + pushing is publishing. Run the same
+script locally to preview (`python3 site/build.py && open site/dist/index.html`); site/dist/ is
+gitignored. The pre-commit hook (`.githooks/pre-commit`, enabled with
+`git config core.hooksPath .githooks`) only blocks commits matching `.sensitive-patterns`.
+A subject can't be named `meta` or `site`.
 Never let a page share its name with a sibling folder (reading.html beside reading/): the folder's
 index becomes unreachable. The build warns about this.
 Public repo means NOTES.md, learning-records/ and state.json are readable on github.com: keep

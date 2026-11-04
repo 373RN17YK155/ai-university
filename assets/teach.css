@@ -1,6 +1,20 @@
 /* teach.css — structural styles for the shared TEACH widgets. Colours come
    from the subject stylesheet's tokens (linked before this file). */
 
+/* ----------------------------------------------------------- code copy -- */
+.t-copy-wrap { position: relative; }
+.t-copy {
+  position: absolute; top: .4rem; right: .4rem;
+  font: 600 .75rem/1 var(--sans); cursor: pointer;
+  background: var(--bg); color: var(--muted); border: 1px solid var(--rule); border-radius: 5px;
+  padding: .35rem .55rem; opacity: 0; transition: opacity .15s;
+}
+.t-copy-wrap:hover .t-copy, .t-copy:focus-visible, .t-copy.is-done { opacity: 1; }
+.t-copy:hover { color: var(--ink); border-color: var(--accent); }
+.t-copy.is-done { color: var(--good); border-color: var(--good); }
+@media (hover: none) { .t-copy { opacity: 1; } }
+@media print { .t-copy { display: none; } }
+
 /* ---------------------------------------------------------------- quiz -- */
 .t-quiz { font-family: var(--sans); margin: 1.2rem 0; }
 .t-q { border: 1px solid var(--rule); border-radius: 8px; padding: .9rem 1rem; margin: 0 0 1rem; }
